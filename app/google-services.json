@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "478842219848",
+    "project_id": "proycompo2",
+    "storage_bucket": "proycompo2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:478842219848:android:6fef10c0ac6f3167c0d77d",
+        "android_client_info": {
+          "package_name": "com.example.taller2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEX_ZwUg6X59bYiCXpuD0UVhzACi887l4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
