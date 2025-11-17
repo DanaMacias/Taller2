@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -19,7 +20,9 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.taller2.ui.AccountScreen
 import com.example.taller2.ui.ResultsActivity
@@ -41,48 +44,57 @@ fun GameNavigationDrawer() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-
     var currentScreen by remember { mutableStateOf("home") }
 
     ModalNavigationDrawer(
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                modifier = Modifier.background(Color(0xFF0D0B24)),
+                drawerContainerColor = Color(0xFF0D0B24)
+            ) {
                 Column(
                     modifier = Modifier
                         .padding(16.dp)
-                        .verticalScroll(rememberScrollState())
+                        .fillMaxHeight()
                 ) {
 
-                    Text("Menú", style = MaterialTheme.typography.headlineMedium)
+                    Text("Menú", color = Color.White, style = MaterialTheme.typography.headlineMedium)
                     Spacer(Modifier.height(20.dp))
 
                     NavigationDrawerItem(
-                        label = { Text("Inicio") },
+                        label = { Text("Inicio", color = Color.White) },
                         selected = currentScreen == "home",
                         onClick = {
                             currentScreen = "home"
                             scope.launch { drawerState.close() }
                         },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Color(0xFF1E1B3C)
+                        )
                     )
 
                     NavigationDrawerItem(
-                        label = { Text("Salas") },
+                        label = { Text("Salas", color = Color.White) },
                         selected = currentScreen == "rooms",
                         onClick = {
                             currentScreen = "rooms"
                             scope.launch { drawerState.close() }
                         },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Color(0xFF1E1B3C)
+                        )
                     )
+
                     NavigationDrawerItem(
-                        label = { Text("Perfil") },
+                        label = { Text("Perfil", color = Color.White) },
                         selected = currentScreen == "Perfil",
                         onClick = {
                             currentScreen = "Perfil"
                             scope.launch { drawerState.close() }
                         },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Color(0xFF1E1B3C)
+                        )
                     )
                 }
             }
@@ -90,9 +102,13 @@ fun GameNavigationDrawer() {
         drawerState = drawerState
     ) {
         Scaffold(
+            containerColor = Color(0xFF0D0B24),
             topBar = {
                 TopAppBar(
-                    title = { Text("GameActivity") },
+                    title = { Text("GameActivity", color = Color.White) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color(0xFF1E1B3C)
+                    ),
                     navigationIcon = {
                         TextButton(
                             onClick = {
@@ -102,22 +118,27 @@ fun GameNavigationDrawer() {
                                 }
                             }
                         ) {
-                            Text("≡")   // Menu estilo texto
+                            Text("≡", color = Color.White)
                         }
                     }
                 )
             }
         ) { innerPadding ->
-            Box(modifier = Modifier.padding(innerPadding)) {
+            Box(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .background(Color(0xFF0D0B24))
+            ) {
                 when (currentScreen) {
                     "home" -> GameHomeScreen()
                     "rooms" -> RoomScreen()
-                    "Perfil" -> AccountScreen {  }
+                    "Perfil" -> AccountScreen { }
                 }
             }
         }
     }
 }
+
 
 
 @Composable
@@ -132,12 +153,23 @@ fun GameHomeScreen() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Welcome!", style = MaterialTheme.typography.headlineMedium)
+
+        Text(
+            "Welcome!",
+            color = Color.White,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+
         Spacer(Modifier.height(10.dp))
-        Text("Main game screen")
+
+        Text(
+            "Main game screen",
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold
+        )
 
         Spacer(Modifier.height(30.dp))
-
 
         Button(
             onClick = {
@@ -147,10 +179,9 @@ fun GameHomeScreen() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A3CFF))
         ) {
-            Text("View Results", color = MaterialTheme.colorScheme.onPrimary)
+            Text("View Results", color = Color.White, fontWeight = FontWeight.Bold)
         }
     }
 }
-

@@ -1,13 +1,15 @@
 package com.example.taller2.ui.screens.room
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.taller2.viewmodel.RoomViewModel
 
@@ -25,90 +27,96 @@ fun RoomScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFF0D0B24))
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         when (screenMode) {
 
-
             "menu" -> {
                 Text(
                     "¿Qué deseas hacer?",
+                    color = Color.White,
                     style = MaterialTheme.typography.headlineMedium
                 )
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(24.dp))
 
                 Button(
                     onClick = { screenMode = "create" },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A3CFF))
                 ) {
-                    Text("Crear Sala")
+                    Text("Crear Sala", color = Color.White)
                 }
 
                 Spacer(Modifier.height(12.dp))
 
                 Button(
                     onClick = { screenMode = "join" },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A3CFF))
                 ) {
-                    Text("Unirme a Sala")
+                    Text("Unirme a Sala", color = Color.White)
                 }
             }
 
-
-            // ----------------------------------------------------------
-            // 🔶 CREAR SALA
-            // ----------------------------------------------------------
             "create" -> {
-                Text("Crear Sala", style = MaterialTheme.typography.headlineMedium)
+                Text("Crear Sala", color = Color.White, style = MaterialTheme.typography.headlineMedium)
                 Spacer(Modifier.height(20.dp))
 
                 OutlinedTextField(
                     value = playerName,
                     onValueChange = { playerName = it },
-                    label = { Text("Tu nombre") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Tu nombre", color = Color.White) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        cursorColor = Color.White,
+                        focusedContainerColor = Color(0xFF1E1B3C),
+                        unfocusedContainerColor = Color(0xFF1E1B3C),
+                        focusedBorderColor = Color(0xFF7A3CFF),
+                        unfocusedBorderColor = Color.White
+                    )
                 )
 
                 Spacer(Modifier.height(20.dp))
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A3CFF)),
                     onClick = {
                         if (playerName.isBlank()) {
                             message = "Por favor escribe tu nombre."
                             return@Button
                         }
 
-                        // Generar código y crear sala
                         roomViewModel.generateRoomCode { generated ->
-
                             roomCode = generated
 
                             roomViewModel.createRoom(generated, playerName) { success ->
-                                if (success) {
-                                    message = "Sala creada correctamente"
+                                message = if (success) {
                                     roomViewModel.startListening(generated)
-                                } else {
-                                    message = "Error: ya existe una sala con ese código."
-                                }
+                                    "Sala creada correctamente"
+                                } else "Error: ya existe una sala con ese código."
                             }
                         }
                     }
                 ) {
-                    Text("Generar código y crear sala")
+                    Text("Generar código y crear sala", color = Color.White)
                 }
 
                 Spacer(Modifier.height(20.dp))
 
                 if (roomCode.isNotBlank()) {
-                    Text("Código de sala (compártelo):", style = MaterialTheme.typography.bodyLarge)
+                    Text("Código de sala (compártelo):", color = Color.White)
+                    Spacer(Modifier.height(8.dp))
                     Text(
                         roomCode,
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.primary
+                        color = Color(0xFF7A3CFF),
+                        style = MaterialTheme.typography.headlineLarge
                     )
                 }
 
@@ -116,25 +124,31 @@ fun RoomScreen(
 
                 Button(
                     onClick = { screenMode = "menu" },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A3CFF))
                 ) {
-                    Text("Volver")
+                    Text("Volver", color = Color.White)
                 }
             }
 
-
-            // ----------------------------------------------------------
-            // 🔷 UNIRME A SALA
-            // ----------------------------------------------------------
             "join" -> {
-                Text("Unirme a Sala", style = MaterialTheme.typography.headlineMedium)
+                Text("Unirme a Sala", color = Color.White, style = MaterialTheme.typography.headlineMedium)
                 Spacer(Modifier.height(20.dp))
 
                 OutlinedTextField(
                     value = playerName,
                     onValueChange = { playerName = it },
-                    label = { Text("Tu nombre") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Tu nombre", color = Color.White) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        cursorColor = Color.White,
+                        focusedContainerColor = Color(0xFF1E1B3C),
+                        unfocusedContainerColor = Color(0xFF1E1B3C),
+                        focusedBorderColor = Color(0xFF7A3CFF),
+                        unfocusedBorderColor = Color.White
+                    )
                 )
 
                 Spacer(Modifier.height(12.dp))
@@ -146,15 +160,25 @@ fun RoomScreen(
                             roomCode = it
                         }
                     },
-                    label = { Text("Código de sala") },
+                    label = { Text("Código de sala", color = Color.White) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        cursorColor = Color.White,
+                        focusedContainerColor = Color(0xFF1E1B3C),
+                        unfocusedContainerColor = Color(0xFF1E1B3C),
+                        focusedBorderColor = Color(0xFF7A3CFF),
+                        unfocusedBorderColor = Color.White
+                    )
                 )
 
                 Spacer(Modifier.height(20.dp))
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A3CFF)),
                     onClick = {
                         if (playerName.isBlank() || roomCode.length != 4) {
                             message = "Completa tu nombre y un código válido."
@@ -162,53 +186,42 @@ fun RoomScreen(
                         }
 
                         roomViewModel.joinRoom(roomCode, playerName) { success ->
-                            if (success) {
-                                message = "Unido con éxito"
+                            message = if (success) {
                                 roomViewModel.startListening(roomCode)
-                            } else {
-                                message = "La sala no existe o está llena."
-                            }
+                                "Unido con éxito"
+                            } else "La sala no existe o está llena."
                         }
                     }
                 ) {
-                    Text("Unirme")
+                    Text("Unirme", color = Color.White)
                 }
 
                 Spacer(Modifier.height(20.dp))
 
                 Button(
                     onClick = { screenMode = "menu" },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A3CFF))
                 ) {
-                    Text("Volver")
+                    Text("Volver", color = Color.White)
                 }
             }
         }
 
-
-        // ----------------------------------------------------------
-        // MENSAJES
-        // ----------------------------------------------------------
         if (message.isNotBlank()) {
             Spacer(Modifier.height(20.dp))
-            Text(
-                text = message,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Text(text = message, color = Color(0xFF7A3CFF))
         }
 
-        // ----------------------------------------------------------
-        // ESTADO DE LA SALA EN TIEMPO REAL
-        // ----------------------------------------------------------
         roomState?.let { room ->
             Spacer(Modifier.height(30.dp))
-            Divider()
+            Divider(color = Color.White.copy(alpha = 0.3f))
             Spacer(Modifier.height(20.dp))
-            Text("Sala activa:", style = MaterialTheme.typography.titleMedium)
-            Text("Código: ${room.id}")
-            Text("Host: ${room.hostPlayer}")
-            Text("Invitado: ${room.guestPlayer ?: "Esperando..."}")
-            Text("Turno: ${room.playerTurn ?: "N/A"}")
+            Text("Sala activa:", color = Color.White)
+            Text("Código: ${room.id}", color = Color.White)
+            Text("Host: ${room.hostPlayer}", color = Color.White)
+            Text("Invitado: ${room.guestPlayer ?: "Esperando..."}", color = Color.White)
+            Text("Turno: ${room.playerTurn ?: "N/A"}", color = Color.White)
         }
     }
 }
