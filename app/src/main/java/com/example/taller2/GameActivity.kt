@@ -1,5 +1,7 @@
 package com.example.taller2
 
+import android.accounts.Account
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,7 +19,10 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.taller2.ui.AccountScreen
+import com.example.taller2.ui.ResultsActivity
 import kotlinx.coroutines.launch
 import com.example.taller2.ui.screens.room.RoomScreen
 
@@ -36,7 +41,7 @@ fun GameNavigationDrawer() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Control de qué pantalla mostrar
+
     var currentScreen by remember { mutableStateOf("home") }
 
     ModalNavigationDrawer(
@@ -70,6 +75,15 @@ fun GameNavigationDrawer() {
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
+                    NavigationDrawerItem(
+                        label = { Text("Perfil") },
+                        selected = currentScreen == "Perfil",
+                        onClick = {
+                            currentScreen = "Perfil"
+                            scope.launch { drawerState.close() }
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
                 }
             }
         },
@@ -98,14 +112,19 @@ fun GameNavigationDrawer() {
                 when (currentScreen) {
                     "home" -> GameHomeScreen()
                     "rooms" -> RoomScreen()
+                    "Perfil" -> AccountScreen {  }
                 }
             }
         }
     }
 }
 
+
 @Composable
 fun GameHomeScreen() {
+
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -113,8 +132,25 @@ fun GameHomeScreen() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Bienvenid@", style = MaterialTheme.typography.headlineMedium)
+        Text("Welcome!", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(10.dp))
-        Text("Pantalla principal juego emonjus")
+        Text("Main game screen")
+
+        Spacer(Modifier.height(30.dp))
+
+
+        Button(
+            onClick = {
+                val intent = Intent(context, ResultsActivity::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Text("View Results", color = MaterialTheme.colorScheme.onPrimary)
+        }
     }
 }
+

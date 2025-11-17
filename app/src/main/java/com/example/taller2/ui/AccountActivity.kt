@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.taller2.GameActivity
 
 class AccountActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,7 +22,7 @@ class AccountActivity : ComponentActivity() {
         setContent {
             AccountScreen(
                 onBackToStart = {
-                    val intent = Intent(this, StartGameActivity::class.java)
+                    val intent = Intent(this, GameActivity::class.java)
                     startActivity(intent)
                     finish()
                 }

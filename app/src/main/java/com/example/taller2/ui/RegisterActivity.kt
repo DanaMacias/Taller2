@@ -17,6 +17,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.example.taller2.GameActivity
+import com.example.taller2.LoginActivity
+
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +27,7 @@ class RegisterActivity : ComponentActivity() {
         setContent {
             RegisterScreen(
                 onRegister = {
-                    val intent = Intent(this, StartGameActivity::class.java)
+                    val intent = Intent(this, GameActivity::class.java)
                     startActivity(intent)
                 },
                 onBackToLogin = {

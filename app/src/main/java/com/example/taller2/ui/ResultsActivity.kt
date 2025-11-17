@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.taller2.GameActivity
 
 
 class ResultsActivity : ComponentActivity() {
@@ -27,7 +28,7 @@ class ResultsActivity : ComponentActivity() {
                 score = score,
                 onBackToStart = {
 
-                    val intent = Intent(this, StartGameActivity::class.java)
+                    val intent = Intent(this, GameActivity::class.java)
                     startActivity(intent)
                     finish()
                 },
