@@ -9,4 +9,5 @@ class FirebaseDataSource {
     )
 
     fun playersRef() = database.getReference("players")
+    fun roomsRef() = database.getReference("rooms")
 }
