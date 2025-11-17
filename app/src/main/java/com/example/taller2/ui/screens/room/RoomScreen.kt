@@ -217,11 +217,34 @@ fun RoomScreen(
             Spacer(Modifier.height(30.dp))
             Divider(color = Color.White.copy(alpha = 0.3f))
             Spacer(Modifier.height(20.dp))
+
             Text("Sala activa:", color = Color.White)
             Text("Código: ${room.id}", color = Color.White)
             Text("Host: ${room.hostPlayer}", color = Color.White)
-            Text("Invitado: ${room.guestPlayer ?: "Esperando..."}", color = Color.White)
-            Text("Turno: ${room.playerTurn ?: "N/A"}", color = Color.White)
+
+            Spacer(Modifier.height(12.dp))
+
+            Text("Jugadores:", color = Color.White)
+            room.players.forEach { playerName ->
+                Text("- $playerName", color = Color.White)
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            val canStart = room.players.size >= 2 && room.players.size <= 4
+
+            Button(
+                onClick = { /* TODO: iniciar partida */ },
+                enabled = canStart,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (canStart) Color(0xFF7A3CFF) else Color.Gray
+                )
+            ) {
+                Text("Iniciar partida", color = Color.White)
+            }
         }
+
+
     }
 }

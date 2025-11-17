@@ -20,22 +20,14 @@ class RoomViewModel(
     }
 
     fun createRoom(roomCode: String, host: String, onComplete: (Boolean) -> Unit) {
-        val newRoom = Room(
-            id = roomCode,
-            hostPlayer = host,
-            guestPlayer = null,
-            isActive = true,
-            playerTurn = host
-        )
-
-        repository.createRoom(newRoom) { success ->
+        repository.createRoomWithPlayers(roomCode, host) { success ->
             onComplete(success)
         }
     }
 
-    fun joinRoom(roomCode: String, guest: String, onResult: (Boolean) -> Unit) {
-        repository.joinRoom(roomCode, guest) { success ->
-            onResult(success)
+    fun joinRoom(roomCode: String, player: String, onComplete: (Boolean) -> Unit) {
+        repository.joinRoom(roomCode, player) { success ->
+            onComplete(success)
         }
     }
 
