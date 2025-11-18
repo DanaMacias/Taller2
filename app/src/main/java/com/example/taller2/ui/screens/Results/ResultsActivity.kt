@@ -1,4 +1,4 @@
-package com.example.taller2.ui
+package com.example.taller2.ui.screens.Results
 
 import android.content.Intent
 import android.os.Bundle
@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.taller2.GameActivity
+import com.example.taller2.ui.screens.Account.AccountActivity
 
 
 class ResultsActivity : ComponentActivity() {
@@ -83,7 +84,7 @@ fun ResultsScreen(
                 text = "Game Results",
                 color = Color.White,
                 fontSize = 36.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -107,13 +108,13 @@ fun ResultsScreen(
                             text = playerName,
                             color = Color.White,
                             fontSize = 20.sp,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                            fontWeight = FontWeight.Medium
                         )
                         Text(
                             text = "$playerScore",
                             color = Color(0xFFFFC107),
                             fontSize = 24.sp,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }

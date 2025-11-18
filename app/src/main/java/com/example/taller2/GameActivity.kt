@@ -1,5 +1,6 @@
 package com.example.taller2
 
+
 import android.accounts.Account
 import android.content.Intent
 import android.os.Bundle
@@ -24,10 +25,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.taller2.ui.AccountScreen
-import com.example.taller2.ui.ResultsActivity
-import kotlinx.coroutines.launch
+import com.example.taller2.ui.screens.Account.AccountScreen
+import com.example.taller2.ui.screens.Results.ResultsActivity
 import com.example.taller2.ui.screens.room.RoomScreen
+
+
+import kotlinx.coroutines.launch
+
 
 class GameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

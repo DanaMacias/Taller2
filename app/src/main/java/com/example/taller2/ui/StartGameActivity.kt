@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.taller2.ui.screens.Results.ResultsActivity
 
 class StartGameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

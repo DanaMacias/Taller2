@@ -1,4 +1,4 @@
-package com.example.taller2.ui
+package com.example.taller2.ui.screens.Account
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.taller2.GameActivity
@@ -47,7 +48,7 @@ fun AccountScreen(
             text = "Mi Cuenta",
             color = Color.White,
             fontSize = 36.sp,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(32.dp))

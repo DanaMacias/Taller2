@@ -1,10 +1,10 @@
-package com.example.taller2
+package com.example.taller2.ui.screens.login
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.BorderStroke
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -17,16 +17,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.taller2.GameActivity
-import com.example.taller2.ui.RegisterActivity
-import com.example.taller2.ui.StartGameActivity
+import com.example.taller2.ui.screens.Register.RegisterActivity
+
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             LoginScreen(
-                onLogin = {
-
+                onLoginSuccess = {
                     val intent = Intent(this, GameActivity::class.java)
                     startActivity(intent)
                 },
@@ -36,16 +35,30 @@ class LoginActivity : ComponentActivity() {
                 }
             )
         }
+
     }
 }
 
 
+
 @Composable
 fun LoginScreen(
-    onLogin: () -> Unit = {},
+    viewModel: LoginViewModel = viewModel(),
+    onLoginSuccess: () -> Unit = {},
     onCreateAccount: () -> Unit = {}
 ) {
     var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    val loginResult by viewModel.loginResult.collectAsState()
+    val loginError by viewModel.loginError.collectAsState()
+
+
+    LaunchedEffect(loginResult) {
+        if (loginResult != null) {
+            onLoginSuccess()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -58,15 +71,11 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Text(
-                text = "Login",
-                color = Color.White,
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Text("Login", color = Color.White, fontSize = 36.sp, fontWeight = FontWeight.Bold)
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(Modifier.height(32.dp))
 
+            // Username
             TextField(
                 value = username,
                 onValueChange = { username = it },
@@ -75,45 +84,64 @@ fun LoginScreen(
                     focusedContainerColor = Color(0x33FFFFFF),
                     unfocusedContainerColor = Color(0x22FFFFFF),
                     focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedTextColor = Color.White
                 ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
+
+            // Password
+            TextField(
+                value = password,
+                onValueChange = { password = it },
+                placeholder = { Text("Password", color = Color.Gray) },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0x33FFFFFF),
+                    unfocusedContainerColor = Color(0x22FFFFFF),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation()
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+
+            if (loginError != null) {
+                Text(
+                    text = loginError!!,
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
 
             Button(
-                onClick = onLogin,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF7A3CFF)
-                )
+                onClick = { viewModel.login(username, password) },
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Sign In", color = Color.White)
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
             Text("OR", color = Color.Gray)
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
             OutlinedButton(
                 onClick = onCreateAccount,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                border = BorderStroke(2.dp, Color(0xFF49A8FF))
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Create Account", color = Color(0xFF49A8FF))
             }
         }
     }
 }
+

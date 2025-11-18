@@ -1,4 +1,4 @@
-package com.example.taller2.ui
+package com.example.taller2.ui.screens.Register
 
 
 
@@ -18,7 +18,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.taller2.GameActivity
-import com.example.taller2.LoginActivity
+import com.example.taller2.ui.screens.login.LoginActivity
+
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

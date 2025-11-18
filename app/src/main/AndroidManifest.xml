@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Taller2">
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.screens.login.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.Taller2">
 
@@ -23,7 +23,7 @@
 
         </activity>
         <activity
-            android:name=".ui.RegisterActivity"
+            android:name=".ui.screens.Register.RegisterActivity"
             android:exported="false"
             android:theme="@style/Theme.Taller2" />
 
@@ -32,12 +32,12 @@
             android:exported="false"
             android:theme="@style/Theme.Taller2" />
         <activity
-            android:name=".ui.AccountActivity"
+            android:name=".ui.screens.Account.AccountActivity"
             android:exported="false"
             android:theme="@style/Theme.Taller2" />
 
         <activity
-            android:name=".ui.ResultsActivity"
+            android:name=".ui.screens.Results.ResultsActivity"
             android:exported="false"
             android:theme="@style/Theme.Taller2" />
 <!--        <activity-->

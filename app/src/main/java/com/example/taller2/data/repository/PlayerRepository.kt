@@ -38,4 +38,25 @@ class PlayerRepository(
     fun updatePlayer(player: Player) {
         firebase.playersRef().child(player.id).setValue(player)
     }
+    fun login(username: String, password: String) = callbackFlow<Player?> {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                val user = snapshot.children
+                    .mapNotNull { it.getValue(Player::class.java) }
+                    .find { it.name == username && it.password == password }
+
+                trySend(user)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                trySend(null)
+            }
+        }
+
+        firebase.playersRef().addListenerForSingleValueEvent(listener)
+
+        awaitClose {}
+    }
+
 }
