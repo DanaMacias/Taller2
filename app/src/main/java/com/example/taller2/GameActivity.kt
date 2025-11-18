@@ -40,152 +40,159 @@ class GameActivity : ComponentActivity() {
             GameNavigationDrawer()
         }
     }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GameNavigationDrawer() {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
 
-    var currentScreen by remember { mutableStateOf("home") }
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun GameNavigationDrawer() {
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val scope = rememberCoroutineScope()
 
-    ModalNavigationDrawer(
-        drawerContent = {
-            ModalDrawerSheet(
-                modifier = Modifier.background(Color(0xFF0D0B24)),
-                drawerContainerColor = Color(0xFF0D0B24)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxHeight()
+        var currentScreen by remember { mutableStateOf("home") }
+
+        ModalNavigationDrawer(
+            drawerContent = {
+                ModalDrawerSheet(
+                    modifier = Modifier.background(Color(0xFF0D0B24)),
+                    drawerContainerColor = Color(0xFF0D0B24)
                 ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxHeight()
+                    ) {
 
-                    Text("Menú", color = Color.White, style = MaterialTheme.typography.headlineMedium)
-                    Spacer(Modifier.height(20.dp))
-
-                    NavigationDrawerItem(
-                        label = { Text("Inicio", color = Color.White) },
-                        selected = currentScreen == "home",
-                        onClick = {
-                            currentScreen = "home"
-                            scope.launch { drawerState.close() }
-                        },
-                        colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = Color(0xFF1E1B3C)
+                        Text(
+                            "Menú",
+                            color = Color.White,
+                            style = MaterialTheme.typography.headlineMedium
                         )
-                    )
+                        Spacer(Modifier.height(20.dp))
 
-                    NavigationDrawerItem(
-                        label = { Text("Salas", color = Color.White) },
-                        selected = currentScreen == "rooms",
-                        onClick = {
-                            currentScreen = "rooms"
-                            scope.launch { drawerState.close() }
-                        },
-                        colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = Color(0xFF1E1B3C)
-                        )
-                    )
-
-                    NavigationDrawerItem(
-                        label = { Text("Perfil", color = Color.White) },
-                        selected = currentScreen == "Perfil",
-                        onClick = {
-                            currentScreen = "Perfil"
-                            scope.launch { drawerState.close() }
-                        },
-                        colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = Color(0xFF1E1B3C)
-                        )
-                    )
-                }
-            }
-        },
-        drawerState = drawerState
-    ) {
-        Scaffold(
-            containerColor = Color(0xFF0D0B24),
-            topBar = {
-                TopAppBar(
-                    title = { Text("GameActivity", color = Color.White) },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color(0xFF1E1B3C)
-                    ),
-                    navigationIcon = {
-                        TextButton(
+                        NavigationDrawerItem(
+                            label = { Text("Inicio", color = Color.White) },
+                            selected = currentScreen == "home",
                             onClick = {
-                                scope.launch {
-                                    if (drawerState.isClosed) drawerState.open()
-                                    else drawerState.close()
-                                }
-                            }
-                        ) {
-                            Text("≡", color = Color.White)
-                        }
+                                currentScreen = "home"
+                                scope.launch { drawerState.close() }
+                            },
+                            colors = NavigationDrawerItemDefaults.colors(
+                                selectedContainerColor = Color(0xFF1E1B3C)
+                            )
+                        )
+
+                        NavigationDrawerItem(
+                            label = { Text("Salas", color = Color.White) },
+                            selected = currentScreen == "rooms",
+                            onClick = {
+                                currentScreen = "rooms"
+                                scope.launch { drawerState.close() }
+                            },
+                            colors = NavigationDrawerItemDefaults.colors(
+                                selectedContainerColor = Color(0xFF1E1B3C)
+                            )
+                        )
+
+                        NavigationDrawerItem(
+                            label = { Text("Perfil", color = Color.White) },
+                            selected = currentScreen == "Perfil",
+                            onClick = {
+                                currentScreen = "Perfil"
+                                scope.launch { drawerState.close() }
+                            },
+                            colors = NavigationDrawerItemDefaults.colors(
+                                selectedContainerColor = Color(0xFF1E1B3C)
+                            )
+                        )
                     }
-                )
-            }
-        ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .background(Color(0xFF0D0B24))
-            ) {
-                when (currentScreen) {
-                    "home" -> GameHomeScreen()
-                    "rooms" -> RoomScreen()
-                    "Perfil" -> AccountScreen { }
+                }
+            },
+            drawerState = drawerState
+        ) {
+            Scaffold(
+                containerColor = Color(0xFF0D0B24),
+                topBar = {
+                    TopAppBar(
+                        title = { Text("GameActivity", color = Color.White) },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = Color(0xFF1E1B3C)
+                        ),
+                        navigationIcon = {
+                            TextButton(
+                                onClick = {
+                                    scope.launch {
+                                        if (drawerState.isClosed) drawerState.open()
+                                        else drawerState.close()
+                                    }
+                                }
+                            ) {
+                                Text("≡", color = Color.White)
+                            }
+                        }
+                    )
+                }
+            ) { innerPadding ->
+                Box(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .background(Color(0xFF0D0B24))
+                ) {
+                    when (currentScreen) {
+                        "home" -> GameHomeScreen()
+                        "rooms" -> RoomScreen()
+                        "Perfil" -> AccountScreen { }
+                    }
                 }
             }
         }
     }
-}
 
 
+    @Composable
+    fun GameHomeScreen() {
 
-@Composable
-fun GameHomeScreen() {
+        val context = LocalContext.current
 
-    val context = LocalContext.current
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        Text(
-            "Welcome!",
-            color = Color.White,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        Text(
-            "Main game screen",
-            color = Color.White,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Spacer(Modifier.height(30.dp))
-
-        Button(
-            onClick = {
-                val intent = Intent(context, ResultsActivity::class.java)
-                context.startActivity(intent)
-            },
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A3CFF))
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("View Results", color = Color.White, fontWeight = FontWeight.Bold)
+
+            Text(
+                "Welcome!",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            Text(
+                "Main game screen",
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(Modifier.height(30.dp))
+
+            Button(
+                onClick = {
+                    val intent = Intent(context, ResultsActivity::class.java)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A3CFF))
+            ) {
+                Text("View Results", color = Color.White, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
+
+
+
