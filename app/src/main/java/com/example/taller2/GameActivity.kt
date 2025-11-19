@@ -1,19 +1,23 @@
 package com.example.taller2
 
+
+import android.accounts.Account
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.*
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +28,10 @@ import androidx.compose.ui.unit.dp
 import com.example.taller2.ui.screens.Account.AccountScreen
 import com.example.taller2.ui.screens.Results.ResultsActivity
 import com.example.taller2.ui.screens.room.RoomScreen
+
+
 import kotlinx.coroutines.launch
+
 
 class GameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +47,6 @@ class GameActivity : ComponentActivity() {
 fun GameNavigationDrawer() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     var currentScreen by remember { mutableStateOf("home") }
 
@@ -55,6 +61,7 @@ fun GameNavigationDrawer() {
                         .padding(16.dp)
                         .fillMaxHeight()
                 ) {
+
                     Text("Menú", color = Color.White, style = MaterialTheme.typography.headlineMedium)
                     Spacer(Modifier.height(20.dp))
 
@@ -121,11 +128,6 @@ fun GameNavigationDrawer() {
                 )
             }
         ) { innerPadding ->
-
-            val shared = context.getSharedPreferences("LOGIN_DATA", android.content.Context.MODE_PRIVATE)
-
-            val userId = shared.getString("userId", "") ?: ""
-
             Box(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -134,21 +136,18 @@ fun GameNavigationDrawer() {
                 when (currentScreen) {
                     "home" -> GameHomeScreen()
                     "rooms" -> RoomScreen()
-                    "Perfil" -> AccountScreen(
-                        userId = userId,
-                        onBackToStart = {
-                            currentScreen = "home"
-                            scope.launch { drawerState.close() }
-                        }
-                    )
+                    "Perfil" -> AccountScreen { }
                 }
             }
         }
     }
 }
 
+
+
 @Composable
 fun GameHomeScreen() {
+
     val context = LocalContext.current
 
     Column(
