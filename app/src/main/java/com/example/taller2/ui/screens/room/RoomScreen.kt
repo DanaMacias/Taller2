@@ -219,7 +219,7 @@ fun RoomScreen(
 
         roomState?.let { room ->
             Spacer(Modifier.height(30.dp))
-            Divider(color = Color.White.copy(alpha = 0.3f))
+              Divider(color = Color.White.copy(alpha = 0.3f))
             Spacer(Modifier.height(20.dp))
 
             Text("Sala activa:", color = Color.White)

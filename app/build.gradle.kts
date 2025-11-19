@@ -53,7 +53,6 @@ dependencies {
     implementation(libs.play.services.cast.framework)
 
     implementation(libs.firebase.perf)
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
