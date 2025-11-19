@@ -1,10 +1,10 @@
 package com.example.taller2.ui.screens.login
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -12,13 +12,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.taller2.GameActivity
 import com.example.taller2.ui.screens.Register.RegisterActivity
-
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +29,7 @@ class LoginActivity : ComponentActivity() {
                 onLoginSuccess = {
                     val intent = Intent(this, GameActivity::class.java)
                     startActivity(intent)
+                    finish()
                 },
                 onCreateAccount = {
                     val intent = Intent(this, RegisterActivity::class.java)
@@ -35,11 +37,8 @@ class LoginActivity : ComponentActivity() {
                 }
             )
         }
-
     }
 }
-
-
 
 @Composable
 fun LoginScreen(
@@ -47,15 +46,21 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit = {},
     onCreateAccount: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     val loginResult by viewModel.loginResult.collectAsState()
     val loginError by viewModel.loginError.collectAsState()
 
-
+    // Cuando el login es exitoso
     LaunchedEffect(loginResult) {
-        if (loginResult != null) {
+        loginResult?.let { player ->
+            // Guardar player_id en SharedPreferences
+            val prefs = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
+            prefs.edit().putString("player_id", player.id).apply()
+
             onLoginSuccess()
         }
     }
@@ -70,8 +75,12 @@ fun LoginScreen(
             modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            Text("Login", color = Color.White, fontSize = 36.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = "Login",
+                color = Color.White,
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold
+            )
 
             Spacer(Modifier.height(32.dp))
 
@@ -110,7 +119,7 @@ fun LoginScreen(
 
             Spacer(Modifier.height(8.dp))
 
-
+            // Mostrar error
             if (loginError != null) {
                 Text(
                     text = loginError!!,
@@ -122,6 +131,7 @@ fun LoginScreen(
 
             Spacer(Modifier.height(8.dp))
 
+            // Sign In button
             Button(
                 onClick = { viewModel.login(username, password) },
                 modifier = Modifier.fillMaxWidth()
@@ -135,6 +145,7 @@ fun LoginScreen(
 
             Spacer(Modifier.height(16.dp))
 
+            // Create Account button
             OutlinedButton(
                 onClick = onCreateAccount,
                 modifier = Modifier.fillMaxWidth()
@@ -144,4 +155,3 @@ fun LoginScreen(
         }
     }
 }
-

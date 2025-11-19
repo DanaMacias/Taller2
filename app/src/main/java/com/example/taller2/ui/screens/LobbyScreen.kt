@@ -18,7 +18,7 @@ fun LobbyScreen(viewModel: PlayerViewModel) {
 
         LazyColumn {
             items(players.size) { i ->
-                Text("${players[i].name} - ${players[i].emoji}")
+               // Text("${players[i].name} - ${players[i].emoji}")
             }
         }
     }

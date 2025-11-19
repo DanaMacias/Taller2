@@ -6,7 +6,7 @@ data class Player(
     val name: String = "",
     val password: String = "",
     val email: String = "",
-    val emoji: String = "",
+
     val isEliminated: Boolean = false,
     val turn: Boolean = false
 )

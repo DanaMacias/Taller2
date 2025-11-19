@@ -32,7 +32,17 @@ class PlayerRepository(
     }
 
     fun addPlayer(player: Player) {
-        firebase.playersRef().child(player.id).setValue(player)
+        // 1. Usa push() para crear una nueva referencia de nodo única.
+        val newPlayerRef = firebase.playersRef().push()
+
+        // 2. Obtiene la clave única generada por push().
+        val playerId = newPlayerRef.key ?: player.id
+
+        // 3. Crea una copia del objeto Player con el ID de Firebase asignado.
+        val playerWithId = player.copy(id = playerId)
+
+        // 4. Guarda el objeto Player completo en el nodo recién creado.
+        newPlayerRef.setValue(playerWithId)
     }
 
     fun updatePlayer(player: Player) {
@@ -58,5 +68,6 @@ class PlayerRepository(
 
         awaitClose {}
     }
+
 
 }

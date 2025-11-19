@@ -1,7 +1,9 @@
 package com.example.taller2.ui.screens.Register
 
-
-
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,44 +15,44 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import com.example.taller2.GameActivity
 import com.example.taller2.ui.screens.login.LoginActivity
-
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
+
+            val viewModel: RegisterViewModel = viewModel()
+
             RegisterScreen(
-                onRegister = {
-                    val intent = Intent(this, GameActivity::class.java)
-                    startActivity(intent)
-                },
+                viewModel = viewModel,
                 onBackToLogin = {
                     val intent = Intent(this, LoginActivity::class.java)
                     startActivity(intent)
-
-
-
+                    finish()
                 }
             )
         }
     }
 }
+
 @Composable
 fun RegisterScreen(
-    onRegister: () -> Unit = {},
-    onBackToLogin: () -> Unit = {}
+    viewModel: RegisterViewModel,
+    onBackToLogin: () -> Unit
 ) {
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+
+    val registerSuccess by viewModel.registerSuccess.collectAsState()
+    val registerError by viewModel.registerError.collectAsState()
+
+    val fieldsEnabled = !registerSuccess
+    val buttonEnabled = !registerSuccess
 
     Box(
         modifier = Modifier
@@ -72,83 +74,95 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+
             TextField(
                 value = fullName,
-                onValueChange = { fullName = it },
+                onValueChange = { if (fieldsEnabled) fullName = it },
                 placeholder = { Text("Full Name", color = Color.Gray) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0x33FFFFFF),
-                    unfocusedContainerColor = Color(0x22FFFFFF),
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
+                enabled = fieldsEnabled,
+                colors = fieldColors(),
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 singleLine = true
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
 
             TextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { if (fieldsEnabled) email = it },
                 placeholder = { Text("Email", color = Color.Gray) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0x33FFFFFF),
-                    unfocusedContainerColor = Color(0x22FFFFFF),
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
+                enabled = fieldsEnabled,
+                colors = fieldColors(),
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 singleLine = true
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
 
             TextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = { if (fieldsEnabled) password = it },
                 placeholder = { Text("Password", color = Color.Gray) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0x33FFFFFF),
-                    unfocusedContainerColor = Color(0x22FFFFFF),
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
+                enabled = fieldsEnabled,
+                colors = fieldColors(),
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 singleLine = true
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
+
             TextField(
                 value = confirmPassword,
-                onValueChange = { confirmPassword = it },
+                onValueChange = { if (fieldsEnabled) confirmPassword = it },
                 placeholder = { Text("Confirm Password", color = Color.Gray) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0x33FFFFFF),
-                    unfocusedContainerColor = Color(0x22FFFFFF),
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
+                enabled = fieldsEnabled,
+                colors = fieldColors(),
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            if (registerError != null) {
+                Text(
+                    text = registerError!!,
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+
+            if (registerSuccess) {
+                Text(
+                    text = "Successful registration",
+                    color = Color(0xFF4CAF50),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
 
             Button(
-                onClick = onRegister,
+                onClick = {
+                    if (password != confirmPassword) {
+                        viewModel.setError("Passwords do not match")
+                    } else if (fullName.isBlank() || email.isBlank() || password.isBlank()) {
+                        viewModel.setError("All fields are required")
+                    } else {
+                        viewModel.register(fullName, email, password)
+                    }
+                },
+                enabled = buttonEnabled,
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF7A3CFF)
+                    containerColor = if (buttonEnabled) Color(0xFF7A3CFF) else Color.Gray
                 )
             ) {
                 Text("Sign Up", color = Color.White)
@@ -166,3 +180,15 @@ fun RegisterScreen(
         }
     }
 }
+
+@Composable
+fun fieldColors() = TextFieldDefaults.colors(
+    focusedContainerColor = Color(0x33FFFFFF),
+    unfocusedContainerColor = Color(0x22FFFFFF),
+    disabledContainerColor = Color(0x11FFFFFF),
+    focusedTextColor = Color.White,
+    unfocusedTextColor = Color.White,
+    disabledTextColor = Color.LightGray,
+    focusedIndicatorColor = Color.Transparent,
+    unfocusedIndicatorColor = Color.Transparent
+)

@@ -8,6 +8,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,8 +22,12 @@ class AccountActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val shared = getSharedPreferences("LOGIN_DATA", MODE_PRIVATE)
+        val userId = shared.getString("userId", "") ?: ""
+
         setContent {
             AccountScreen(
+                userId = userId,
                 onBackToStart = {
                     val intent = Intent(this, GameActivity::class.java)
                     startActivity(intent)
@@ -32,10 +38,19 @@ class AccountActivity : ComponentActivity() {
     }
 }
 
+
 @Composable
 fun AccountScreen(
-    onBackToStart: () -> Unit
+    onBackToStart: () -> Unit,
+    userId: String,
+    viewModel: AccountViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    val user = viewModel.player.collectAsState().value
+
+    LaunchedEffect(Unit) {
+        viewModel.loadUser(userId)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,21 +68,23 @@ fun AccountScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1B3C))
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "Nombre: Usuario Tempral", color = Color.White, fontSize = 18.sp)
-                Text(text = "Email: jnjandan@jjaja.com", color = Color.White, fontSize = 18.sp)
+        if (user != null) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1B3C))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = "Nombre: ${user.name}", color = Color.White, fontSize = 18.sp)
+                    Text(text = "Email: ${user.email}", color = Color.White, fontSize = 18.sp)
+                }
             }
+        } else {
+            CircularProgressIndicator(color = Color.White)
         }
 
         Spacer(modifier = Modifier.height(32.dp))
-
 
         Button(
             onClick = onBackToStart,
@@ -80,3 +97,4 @@ fun AccountScreen(
         }
     }
 }
+
