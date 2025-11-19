@@ -12,21 +12,25 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Taller2">
         <activity
+            android:name=".ui.screens.Game.GameScreen"
+            android:exported="false" />
+        <activity
+            android:name=".ui.screens.Game.GameScreem"
+            android:exported="false" />
+        <activity
             android:name=".ui.screens.login.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.Taller2">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".ui.screens.Register.RegisterActivity"
             android:exported="false"
             android:theme="@style/Theme.Taller2" />
-
         <activity
             android:name=".GameActivity"
             android:exported="false"
@@ -35,16 +39,10 @@
             android:name=".ui.screens.Account.AccountActivity"
             android:exported="false"
             android:theme="@style/Theme.Taller2" />
-
         <activity
             android:name=".ui.screens.Results.ResultsActivity"
             android:exported="false"
             android:theme="@style/Theme.Taller2" />
-<!--        <activity-->
-<!--            android:name=".MainActivity"-->
-<!--            android:exported="false"-->
-<!--            android:theme="@style/Theme.Taller2" />-->
-
     </application>
 
 </manifest>

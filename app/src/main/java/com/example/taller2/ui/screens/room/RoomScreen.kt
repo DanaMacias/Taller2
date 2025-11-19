@@ -1,5 +1,7 @@
 package com.example.taller2.ui.screens.room
 
+import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -8,9 +10,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.taller2.ui.screens.Game.GameScreen
 import com.example.taller2.viewmodel.RoomViewModel
 
 @Composable
@@ -233,8 +237,17 @@ fun RoomScreen(
 
             val canStart = room.players.size >= 2 && room.players.size <= 4
 
+            val context = LocalContext.current
+
             Button(
-                onClick = { /* TODO: iniciar partida */ },
+                onClick = {
+                    if (canStart) {
+                        val intent = Intent(context, GameScreen::class.java)
+                        intent.putExtra("roomCode", room.id)
+                        context.startActivity(intent)
+                        (context as? ComponentActivity)?.finish()
+                    }
+                },
                 enabled = canStart,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
@@ -243,6 +256,8 @@ fun RoomScreen(
             ) {
                 Text("Iniciar partida", color = Color.White)
             }
+
+
         }
 
 
