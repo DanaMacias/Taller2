@@ -79,7 +79,6 @@ class RoomRepository(
                 if (error != null) {
                     onResult(JoinResult.Error)
                 } else if (!committed) {
-                    // La transacción fue abortada, determinamos la razón exacta.
                     val room = currentData?.getValue(Room::class.java)
                     if (room == null) {
                          onResult(JoinResult.RoomNotFound)
@@ -90,7 +89,7 @@ class RoomRepository(
                     } else if (room.players.containsKey(userId)) {
                         onResult(JoinResult.AlreadyJoined)
                     } else {
-                        onResult(JoinResult.Error) // Fallo genérico
+                        onResult(JoinResult.Error)
                     }
                 } else {
                     onResult(JoinResult.Success)

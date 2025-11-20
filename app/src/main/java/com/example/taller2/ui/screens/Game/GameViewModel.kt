@@ -37,57 +37,146 @@ class GameViewModel(
 
     val availableEmojis = listOf("😀","😜","😎","🤖","🐱","🍕","🏀","🌈","🐶","🦄")
 
-    fun startListening(roomId: String) {
-        // 1. Escuchar datos de la Sala (Jugadores, Host, Estado general)
-        viewModelScope.launch {
-            roomRepository.listenRoom(roomId).collect { _room.value = it }
-        }
-        // 2. Escuchar datos del Juego (Turnos, Emojis, Adivinanzas)
-        viewModelScope.launch {
-            gameRepository.listenGame(roomId).collect { gi ->
-                _gameState.value = gi
-            }
-        }
-        // 3. Escuchar el Chat
-        viewModelScope.launch {
-            gameRepository.listenChat(roomId).collect { msgs ->
-                _chat.value = msgs.sortedBy { it.timestamp }
-            }
-        }
+    private var myPlayerId: String = ""
+    private var currentRoomId: String = ""
 
-        // 4. Iniciar el reloj visual
+    fun setPlayerId(id: String) { myPlayerId = id }
+
+    fun startListening(roomId: String) {
+        currentRoomId = roomId
+        viewModelScope.launch { roomRepository.listenRoom(roomId).collect { _room.value = it } }
+        viewModelScope.launch { gameRepository.listenGame(roomId).collect { _gameState.value = it } }
+        viewModelScope.launch { gameRepository.listenChat(roomId).collect { _chat.value = it } }
         startLocalTimer()
     }
 
-    /**
-     * Bucle infinito que actualiza _timeRemaining basándose en la hora del servidor.
-     * NO depende de la memoria del teléfono, sino de la diferencia con 'turnDeadline'.
-     */
+    // --- TIMER CON LÓGICA DE ELIMINACIÓN POR TIEMPO ---
     private fun startLocalTimer() {
         viewModelScope.launch {
             while (true) {
                 val state = _gameState.value
+                val roomData = _room.value
 
-                // Solo calculamos tiempo si el juego ya inició
-                if (state != null && state.started) {
+                if (state != null && state.started && !state.gameEnded && roomData != null) {
                     val now = System.currentTimeMillis()
-
-                    // Cálculo: (Tiempo límite - Ahora) / 1000
                     val diff = ((state.turnDeadline - now) / 1000).coerceAtLeast(0)
-
                     _timeRemaining.value = diff.toInt()
+
+                    // Si soy el HOST y se acaba el tiempo:
+                    if (diff <= 0L && roomData.hostId == myPlayerId) {
+                        // El jugador actual NO adivinó a tiempo -> Eliminado
+                        handleTimeOut(currentRoomId, state)
+                        delay(2000)
+                    }
                 }
-                delay(1000) // Espera 1 segundo exacto
+                delay(1000)
+            }
+        }
+    }
+    fun submitGuess(roomId: String, playerId: String, guessedEmoji: String) {
+        val state = _gameState.value ?: return
+        val correctEmoji = state.assignedEmojis[playerId]
+
+        // Validar si es correcto
+        if (correctEmoji == guessedEmoji) {
+            // ACERTÓ: Guardamos la adivinanza
+            gameRepository.addGuess(roomId, playerId, guessedEmoji) { ok ->
+                if (ok) advanceTurnLogic(roomId) // Pasa turno
+            }
+        } else {
+            // FALLÓ: Eliminar jugador inmediatamente
+            eliminateAndAdvance(roomId, playerId, state)
+        }
+    }
+
+    // Manejo de Timeout (Se acaba el tiempo sin adivinar)
+    private fun handleTimeOut(roomId: String, state: GameState) {
+        val currentPlayerId = state.playersOrder.getOrNull(state.currentTurnIndex) ?: return
+        // Si se le acaba el tiempo, cuenta como fallo -> Eliminar
+        eliminateAndAdvance(roomId, currentPlayerId, state)
+    }
+
+    private fun eliminateAndAdvance(roomId: String, playerId: String, state: GameState) {
+        val newEliminatedList = state.eliminatedPlayers.toMutableList().apply { add(playerId) }
+
+        gameRepository.updateGameFields(roomId, mapOf("eliminatedPlayers" to newEliminatedList)) { ok ->
+            if (ok) {
+                sendSystemMessage(roomId, "🚫 El jugador se equivocó y ha sido ELIMINADO.")
+                advanceTurnLogic(roomId)
             }
         }
     }
 
+    fun advanceTurnLogic(roomId: String) {
 
-    // --- ACCIONES DEL JUEGO ---
+        val state = _gameState.value ?: return
+        val totalPlayers = state.playersOrder.size
+        var nextIndex = state.currentTurnIndex + 1
 
-    /**
-     * Lógica del Anfitrión para preparar y lanzar la partida.
-     */
+        while (nextIndex < totalPlayers && state.eliminatedPlayers.contains(state.playersOrder[nextIndex])) {
+            nextIndex++
+        }
+
+        if (nextIndex >= totalPlayers) {
+            evaluateEndOfRound(roomId, state)
+        } else {
+            val now = System.currentTimeMillis()
+            val newDeadline = now + 60_000L
+            gameRepository.setTurn(roomId, nextIndex, newDeadline) { }
+        }
+    }
+
+    private fun evaluateEndOfRound(roomId: String, state: GameState) {
+        val activePlayers = state.playersOrder.filter { !state.eliminatedPlayers.contains(it) }
+        val activeCount = activePlayers.size
+
+        if (activeCount < 2) {
+            val winner = activePlayers.firstOrNull() ?: "Nadie"
+            gameRepository.endGame(roomId, winner) { }
+            return
+        }
+
+        if (state.isFinalRound) {
+            determineWinnerOfFinalRound(roomId, state, activePlayers)
+        } else {
+            if (activeCount == 2) {
+                sendSystemMessage(roomId, "🔥 ¡DUELO FINAL! Solo quedan 2 jugadores.")
+                startNewRound(roomId, state.round + 1, isFinal = true)
+            } else {
+                startNewRound(roomId, state.round + 1, isFinal = false)
+            }
+        }
+    }
+
+    private fun startNewRound(roomId: String, roundNum: Int, isFinal: Boolean) {
+        val now = System.currentTimeMillis()
+        val deadline = now + 60_000L
+
+        // IMPORTANTE: currentTurnIndex debe empezar en el primer jugador NO eliminado
+        val state = _gameState.value ?: return
+        var firstActiveIndex = 0
+        while (firstActiveIndex < state.playersOrder.size &&
+            state.eliminatedPlayers.contains(state.playersOrder[firstActiveIndex])) {
+            firstActiveIndex++
+        }
+
+        val updates = mapOf(
+            "currentTurnIndex" to firstActiveIndex,
+            "round" to roundNum,
+            "guesses" to null, // Limpiar adivinanzas
+            "isFinalRound" to isFinal,
+            "turnDeadline" to deadline
+        )
+        gameRepository.updateGameFields(roomId, updates) { }
+    }
+
+    private fun determineWinnerOfFinalRound(roomId: String, state: GameState, activePlayers: List<String>) {
+        gameRepository.endGame(roomId, "DRAW") { }
+    }
+
+    private fun sendSystemMessage(roomId: String, text: String) {
+        gameRepository.sendChatMessage(roomId, ChatMessage("SYS", "JUEGO", text)) {}
+    }
     fun hostStartGame(roomId: String, onComplete: (Boolean) -> Unit) {
         val playersMap = _room.value?.players ?: return onComplete(false)
         val playersOrder = playersMap.keys.toList().shuffled()
@@ -120,31 +209,6 @@ class GameViewModel(
         }
     }
 
-    /**
-     * El jugador activo intenta adivinar su emoji.
-     */
-    fun submitGuess(roomId: String, playerId: String, guessedEmoji: String) {
-        // Validación local rápida
-        val correctEmoji = _gameState.value?.assignedEmojis?.get(playerId)
-        val isCorrect = correctEmoji == guessedEmoji
-
-        if (isCorrect) {
-            // Si acierta, guardamos en Firebase
-            gameRepository.addGuess(roomId, playerId, guessedEmoji) { ok ->
-                if (ok) {
-                    // Si se guardó bien, pasamos al siguiente turno
-                    advanceTurnIfNeeded(roomId)
-                }
-            }
-        } else {
-            // Si falla: Podrías agregar lógica aquí (ej. quitar tiempo, mostrar mensaje)
-            // Por ahora no hacemos nada, el usuario debe volver a intentar.
-        }
-    }
-
-    /**
-     * Calcula quién sigue y actualiza el turno en Firebase.
-     */
     fun advanceTurnIfNeeded(roomId: String) {
         val gi = _gameState.value ?: return
         val totalPlayers = gi.playersOrder.size

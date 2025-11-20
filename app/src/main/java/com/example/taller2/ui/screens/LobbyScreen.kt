@@ -134,11 +134,7 @@ fun LobbyScreen(
                     }
                 } else {
                     viewModel.leaveRoom(room.id, myUserId) { success ->
-                        if (success) {
                             onExitLobby()
-                        } else {
-                            isExiting = false
-                        }
                     }
                 }
             },

@@ -92,4 +92,31 @@ class GameRepository(private val firebase: FirebaseDataSource = FirebaseDataSour
         ref.addValueEventListener(listener)
         awaitClose { ref.removeEventListener(listener) }
     }
+
+    fun eliminatePlayer(roomId: String, playerId: String, onComplete: (Boolean) -> Unit) {
+    }
+
+    fun startNewRound(roomId: String, newRound: Int, isFinal: Boolean, deadline: Long, onComplete: (Boolean) -> Unit) {
+        val updates = mapOf(
+            "currentTurnIndex" to 0,
+            "round" to newRound,
+            "guesses" to null,
+            "isFinalRound" to isFinal,
+            "turnDeadline" to deadline
+        )
+        gameRef(roomId).updateChildren(updates)
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
+    }
+
+    fun endGame(roomId: String, winnerId: String, onComplete: (Boolean) -> Unit) {
+        val updates = mapOf(
+            "gameEnded" to true,
+            "winnerId" to winnerId,
+            "started" to false
+        )
+        gameRef(roomId).updateChildren(updates)
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
+    }
 }
