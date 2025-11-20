@@ -1,11 +1,12 @@
 package com.example.taller2.viewmodel
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.taller2.data.model.JoinResult
 import com.example.taller2.data.model.Room
 import com.example.taller2.data.repository.RoomRepository
-
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,16 +22,24 @@ class RoomViewModel(
         repository.generateUniqueRoomCode(onGenerated)
     }
 
-    fun createRoom(roomCode: String, host: String, onComplete: (Boolean) -> Unit) {
-        repository.createRoomWithPlayers(roomCode, host) { success ->
+    fun createRoom(roomCode: String, userId: String, userName: String, onComplete: (Boolean) -> Unit) {
+        val room = Room(
+            id = roomCode,
+            hostId = userId,
+            players = mapOf(userId to userName),
+            playerStatus = mapOf(userId to false),
+            isActive = true,
+            currentTurnPlayerId = userId,
+            maxPlayers = 4
+        )
+
+        repository.createRoom(room) { success ->
             onComplete(success)
         }
     }
 
-    fun joinRoom(roomCode: String, player: String, onComplete: (Boolean) -> Unit) {
-        repository.joinRoom(roomCode, player) { success ->
-            onComplete(success)
-        }
+    fun joinRoom(roomCode: String, userId: String, userName: String, onComplete: (JoinResult) -> Unit) {
+        repository.joinRoom(roomCode, userId, userName, onComplete)
     }
 
     fun startListening(roomCode: String) {
@@ -40,4 +49,17 @@ class RoomViewModel(
             }
         }
     }
+
+    fun closeRoom(roomCode: String, onComplete: (Boolean) -> Unit) {
+        repository.closeRoom(roomCode, onComplete)
+    }
+
+    fun leaveRoom(roomCode: String, userId: String, onComplete: (Boolean) -> Unit) {
+        repository.leaveRoom(roomCode, userId, onComplete)
+    }
+
+    fun clearRoomState() {
+        _room.value = null
+    }
 }
+

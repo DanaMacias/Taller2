@@ -15,7 +15,6 @@ class GameScreen : ComponentActivity() {
         setContent {
             val gameViewModel: GameViewModel = viewModel()
 
-            // Iniciar el juego para esta sala
             gameViewModel.startListening(roomCode)
 
             GameScreenUI(

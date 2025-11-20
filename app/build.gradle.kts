@@ -49,7 +49,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.compose.ui.graphics)
-
+    implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.play.services.cast.framework)
 
     implementation(libs.firebase.perf)

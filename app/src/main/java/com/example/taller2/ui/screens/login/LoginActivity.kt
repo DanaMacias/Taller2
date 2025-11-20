@@ -55,11 +55,17 @@ fun LoginScreen(
     val loginError by viewModel.loginError.collectAsState()
 
     // Cuando el login es exitoso
+
     LaunchedEffect(loginResult) {
         loginResult?.let { player ->
-            // Guardar player_id en SharedPreferences
             val prefs = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
-            prefs.edit().putString("player_id", player.id).apply()
+
+            with(prefs.edit()) {
+                putString("player_id", player.id)
+                putString("player_name", player.name)
+
+                apply()
+            }
 
             onLoginSuccess()
         }

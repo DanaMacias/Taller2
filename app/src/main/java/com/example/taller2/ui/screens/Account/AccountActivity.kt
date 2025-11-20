@@ -1,5 +1,6 @@
 package com.example.taller2.ui.screens.Account
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,9 +11,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,8 +25,10 @@ class AccountActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val shared = getSharedPreferences("LOGIN_DATA", MODE_PRIVATE)
-        val userId = shared.getString("userId", "") ?: ""
+
+        val shared = getSharedPreferences("user_session", MODE_PRIVATE)
+
+        val userId = shared.getString("player_id", "") ?: ""
 
         setContent {
             AccountScreen(
