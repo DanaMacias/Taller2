@@ -27,11 +27,21 @@ fun LobbyScreen(
 ) {
     val roomState by viewModel.room.collectAsState()
 
+    // Cuando roomState se vuelve nulo (ej. eliminado de Firebase), sal del lobby.
+    // Esto se encarga de que todos los jugadores sean expulsados cuando el anfitrión elimina la sala.
+    LaunchedEffect(roomState) {
+        if (roomState == null) {
+            onExitLobby()
+            return@LaunchedEffect
+        }
+    }
+
+    val room = roomState ?: return // Si la sala es nula, no mostramos nada y esperamos a que LaunchedEffect nos saque.
+
     val context = LocalContext.current
     val shared = remember { context.getSharedPreferences("user_session", Context.MODE_PRIVATE) }
     val myUserId = shared.getString("player_id", "") ?: ""
 
-    val room = roomState ?: return
 
     LaunchedEffect(room.gameStarted) {
         if (room.gameStarted) {
@@ -84,9 +94,6 @@ fun LobbyScreen(
 
         Spacer(Modifier.height(20.dp))
 
-        val amIHost = room.hostId == myUserId
-        val canStart = room.players.size >= 2
-
         if (amIHost) {
             Button(
                 onClick = {
@@ -120,18 +127,14 @@ fun LobbyScreen(
             onClick = {
                 isExiting = true
                 if (amIHost) {
-                    viewModel.closeRoom(room.id) { success ->
-                        if (success) {
-                            viewModel.clearRoomState()
-                            onExitLobby()
-                        } else {
+                    viewModel.deleteRoom(room.id) { success ->
+                        if (!success) {
                             isExiting = false
                         }
                     }
                 } else {
                     viewModel.leaveRoom(room.id, myUserId) { success ->
                         if (success) {
-                            viewModel.clearRoomState()
                             onExitLobby()
                         } else {
                             isExiting = false
@@ -148,7 +151,7 @@ fun LobbyScreen(
             if (isExiting) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
             } else {
-                Text(if (amIHost) "Cerrar y Desactivar Sala" else "Abandonar Sala", color = Color.White)
+                Text(if (amIHost) "Eliminar Sala" else "Abandonar Sala", color = Color.White)
             }
         }
     }

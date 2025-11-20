@@ -43,49 +43,60 @@ class RoomRepository(
         onResult: (JoinResult) -> Unit
     ){
         val roomRef = firebase.roomsRef().child(roomCode)
+        roomRef.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(currentData: MutableData): Transaction.Result {
+                val room = currentData.getValue(Room::class.java)
+                if (room == null) {
+                    // La sala no existe, se abortará y onComplete lo manejará.
+                    return Transaction.abort()
+                }
 
-        roomRef.get().addOnSuccessListener { snapshot ->
-            val room = snapshot.getValue(Room::class.java)
+                if (!room.isActive) {
+                    return Transaction.abort() // Aborta si la sala está inactiva.
+                }
 
-            if (room == null) {
-                onResult(JoinResult.RoomNotFound)
-                return@addOnSuccessListener
+                if (room.players.size >= room.maxPlayers) {
+                    return Transaction.abort() // Aborta si la sala está llena.
+                }
+
+                if (room.players.containsKey(userId)) {
+                    return Transaction.abort() // Aborta si el jugador ya está dentro.
+                }
+
+                val updatedPlayers = room.players.toMutableMap()
+                updatedPlayers[userId] = userName
+
+                val updatedStatus = room.playerStatus.toMutableMap()
+                updatedStatus[userId] = false
+
+                currentData.child("players").value = updatedPlayers
+                currentData.child("playerStatus").value = updatedStatus
+
+                return Transaction.success(currentData)
             }
 
-            if (!room.isActive) {
-                Log.w("RoomRepo", "Sala inactiva, no se puede unir.")
-                onResult(JoinResult.RoomInactive)
-                return@addOnSuccessListener
+            override fun onComplete(error: DatabaseError?, committed: Boolean, currentData: DataSnapshot?) {
+                if (error != null) {
+                    onResult(JoinResult.Error)
+                } else if (!committed) {
+                    // La transacción fue abortada, determinamos la razón exacta.
+                    val room = currentData?.getValue(Room::class.java)
+                    if (room == null) {
+                         onResult(JoinResult.RoomNotFound)
+                    } else if (!room.isActive) {
+                         onResult(JoinResult.RoomInactive)
+                    } else if (room.players.size >= room.maxPlayers) {
+                        onResult(JoinResult.RoomFull)
+                    } else if (room.players.containsKey(userId)) {
+                        onResult(JoinResult.AlreadyJoined)
+                    } else {
+                        onResult(JoinResult.Error) // Fallo genérico
+                    }
+                } else {
+                    onResult(JoinResult.Success)
+                }
             }
-
-            if (room.players.size >= room.maxPlayers) {
-                onResult(JoinResult.RoomFull)
-                return@addOnSuccessListener
-            }
-
-            if (room.players.containsKey(userId)) {
-                onResult(JoinResult.AlreadyJoined)
-                return@addOnSuccessListener
-            }
-
-            val updatedPlayers = room.players.toMutableMap()
-            updatedPlayers[userId] = userName
-
-            val updatedStatus = room.playerStatus.toMutableMap()
-            updatedStatus[userId] = false
-
-            val updates = mapOf(
-                "players" to updatedPlayers,
-                "playerStatus" to updatedStatus
-            )
-
-            roomRef.updateChildren(updates)
-                .addOnSuccessListener { onResult(JoinResult.Success) }
-                .addOnFailureListener { onResult(JoinResult.Error) }
-
-        }.addOnFailureListener {
-            onResult(JoinResult.Error)
-        }
+        })
     }
 
 
@@ -95,33 +106,28 @@ class RoomRepository(
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.exists()) {
                     trySend(null)
+                    close()
                     return
                 }
                 val room = snapshot.getValue(Room::class.java)
                 trySend(room)
             }
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
         }
         ref.addValueEventListener(listener)
         awaitClose { ref.removeEventListener(listener) }
     }
 
-    fun closeRoom(roomCode: String, onComplete: (Boolean) -> Unit) {
-        val roomRef = firebase.roomsRef().child(roomCode)
-
-        val updates = mapOf(
-            "isActive" to false
-        )
-
-        Log.d("CloseRoom", "Cerrando sala $roomCode")
-
-        roomRef.updateChildren(updates)
+    fun deleteRoom(roomCode: String, onComplete: (Boolean) -> Unit) {
+        firebase.roomsRef().child(roomCode).removeValue()
             .addOnSuccessListener {
-                Log.d("CloseRoom", "Sala cerrada correctamente")
+                Log.d("DeleteRoom", "Sala eliminada correctamente")
                 onComplete(true)
             }
             .addOnFailureListener {
-                Log.e("CloseRoom", "Error al cerrar sala: ${it.message}")
+                Log.e("DeleteRoom", "Error al eliminar la sala: ${it.message}")
                 onComplete(false)
             }
     }
@@ -129,25 +135,49 @@ class RoomRepository(
     fun leaveRoom(roomCode: String, userId: String, onComplete: (Boolean) -> Unit) {
         val roomRef = firebase.roomsRef().child(roomCode)
 
-        roomRef.get().addOnSuccessListener { snapshot ->
-            val room = snapshot.getValue(Room::class.java) ?: return@addOnSuccessListener onComplete(false)
+        roomRef.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(currentData: MutableData): Transaction.Result {
+                val room = currentData.getValue(Room::class.java)
+                    ?: return Transaction.success(currentData) // La sala no existe, no hay nada que hacer.
 
-            val updatedPlayers = room.players.toMutableMap()
-            updatedPlayers.remove(userId)
+                if (!room.players.containsKey(userId)) {
+                    return Transaction.success(currentData) // El jugador no está en la sala.
+                }
 
-            val updatedStatus = room.playerStatus.toMutableMap()
-            updatedStatus.remove(userId)
+                val updatedPlayers = room.players.toMutableMap()
+                updatedPlayers.remove(userId)
 
-            val updates = mapOf(
-                "players" to updatedPlayers,
-                "playerStatus" to updatedStatus
-            )
+                // Si el jugador que se va es el anfitrión, eliminamos la sala.
+                if (room.hostId == userId) {
+                    currentData.value = null
+                    return Transaction.success(currentData)
+                }
 
-            roomRef.updateChildren(updates)
-                .addOnSuccessListener { onComplete(true) }
-                .addOnFailureListener { onComplete(false) }
+                val updatedStatus = room.playerStatus.toMutableMap()
+                updatedStatus.remove(userId)
 
-        }.addOnFailureListener { onComplete(false) }
+                // Si la sala queda vacía, también la eliminamos.
+                if (updatedPlayers.isEmpty()) {
+                    currentData.value = null
+                } else {
+                    // Actualizamos solo los mapas necesarios.
+                    currentData.child("players").value = updatedPlayers
+                    currentData.child("playerStatus").value = updatedStatus
+                }
+
+                return Transaction.success(currentData)
+            }
+
+            override fun onComplete(
+                error: DatabaseError?,
+                committed: Boolean,
+                currentData: DataSnapshot?
+            ) {
+                // `onComplete` se llama siempre, tanto en éxito como en fallo.
+                // Esto garantiza que la animación de carga no se quede congelada.
+                onComplete(error == null && committed)
+            }
+        })
     }
 
     fun startGame(roomId: String, onComplete: (Boolean) -> Unit) {
@@ -155,5 +185,18 @@ class RoomRepository(
             .setValue(true)
             .addOnSuccessListener { onComplete(true) }
             .addOnFailureListener { onComplete(false) }
+    }
+
+    fun updateRoomField(
+        roomId: String,
+        field: String,
+        value: Any,
+        callback: (Boolean) -> Unit
+    ) {
+        firebase.roomsRef().child(roomId)
+            .child(field)
+            .setValue(value)
+            .addOnSuccessListener { callback(true) }
+            .addOnFailureListener { callback(false) }
     }
 }
