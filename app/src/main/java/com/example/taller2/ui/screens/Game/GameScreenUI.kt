@@ -30,7 +30,6 @@ fun GameScreenUI(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
 
-        // --- 1. HEADER TIMER + BOTONES ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -65,7 +64,6 @@ fun GameScreenUI(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- 2. TURNO ---
         Text(
             text = "Turno: ${state?.currentPlayer ?: ""}",
             fontWeight = FontWeight.Bold,
@@ -75,7 +73,6 @@ fun GameScreenUI(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- 3. LISTA DE JUGADORES ---
         Text(
             text = "Jugadores:",
             fontWeight = FontWeight.SemiBold,
@@ -101,7 +98,6 @@ fun GameScreenUI(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // --- 4. CHAT (simulado por ahora) ---
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -119,7 +115,6 @@ fun GameScreenUI(
                 }
             }
 
-            // Input de mensaje
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

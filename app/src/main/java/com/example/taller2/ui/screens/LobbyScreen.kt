@@ -32,9 +32,18 @@ fun LobbyScreen(
     val myUserId = shared.getString("player_id", "") ?: ""
 
     val room = roomState ?: return
+
+    LaunchedEffect(room.gameStarted) {
+        if (room.gameStarted) {
+            onStartGame()
+        }
+    }
+
     val amIHost = room.hostId == myUserId
     val canStart = room.players.size >= 2
     var isExiting by remember { mutableStateOf(false) }
+
+
 
     Column(
         modifier = Modifier
@@ -80,7 +89,13 @@ fun LobbyScreen(
 
         if (amIHost) {
             Button(
-                onClick = onStartGame,
+                onClick = {
+                    viewModel.startGame(room.id) { success ->
+                        if (success) {
+                            onStartGame()
+                        }
+                    }
+                },
                 enabled = canStart,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(

@@ -149,4 +149,11 @@ class RoomRepository(
 
         }.addOnFailureListener { onComplete(false) }
     }
+
+    fun startGame(roomId: String, onComplete: (Boolean) -> Unit) {
+        firebase.roomsRef().child(roomId).child("gameStarted")
+            .setValue(true)
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
+    }
 }

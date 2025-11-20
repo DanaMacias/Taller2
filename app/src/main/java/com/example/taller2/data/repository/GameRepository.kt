@@ -12,7 +12,6 @@ class GameRepository {
 
     private val db = FirebaseDatabase.getInstance().reference
 
-    // ----------------------- LECTURA DEL ESTADO -----------------------
     fun listenGame(roomCode: String) = callbackFlow {
         val ref = db.child("rooms").child(roomCode).child("game")
 
@@ -29,14 +28,10 @@ class GameRepository {
         awaitClose { ref.removeEventListener(listener) }
     }
 
-
-    // ----------------------- ACTUALIZAR ESTADO COMPLETO -----------------------
     fun updateGame(roomCode: String, gameState: GameState) {
         db.child("rooms/$roomCode/game").setValue(gameState)
     }
 
-
-    // ----------------------- TIMER -----------------------
     fun updateTimer(roomCode: String, sec: Int) {
         db.child("rooms/$roomCode/game/timerSeconds").setValue(sec)
     }
@@ -45,8 +40,6 @@ class GameRepository {
         db.child("rooms/$roomCode/game/isPaused").setValue(paused)
     }
 
-
-    // ----------------------- GANADOR / EMPATE -----------------------
     fun markWinner(roomCode: String, player: String) {
         db.child("rooms/$roomCode/game/winner").setValue(player)
     }
@@ -55,8 +48,6 @@ class GameRepository {
         db.child("rooms/$roomCode/game/winner").setValue("EMPATE")
     }
 
-
-    // ----------------------- CHAT -----------------------
     fun sendMessage(roomCode: String, text: String) {
         val messageId = db.push().key ?: return
 

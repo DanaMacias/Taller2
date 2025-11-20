@@ -8,7 +8,7 @@ fun addPlayerToRoomLocal(room: Room, player: String): Room? {
     if (room.players.contains(player)) return room
     if (room.players.size >= 4) return null
 
-    val updatedPlayers = room.players + player
+    val updatedPlayers = room.players //+ player
 
     return room.copy(players = updatedPlayers)
 }

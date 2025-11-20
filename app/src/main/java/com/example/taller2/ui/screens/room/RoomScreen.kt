@@ -118,26 +118,18 @@ fun RoomScreen(
                                         roomViewModel.startListening(roomCodeInput)
                                         message = "Te uniste con éxito"
                                     }
-
-                                    is JoinResult.RoomNotFound ->
-                                        message = "❌ La sala no existe"
-
-                                    is JoinResult.RoomInactive ->
-                                        message = "⚠ La sala está cerrada"
-
-                                    is JoinResult.RoomFull ->
-                                        message = "🚫 La sala está llena"
-
+                                    is JoinResult.RoomNotFound -> message = "❌ La sala no existe"
+                                    is JoinResult.RoomInactive -> message = "⚠ La sala está cerrada"
+                                    is JoinResult.RoomFull -> message = "🚫 La sala está llena"
                                     is JoinResult.AlreadyJoined -> {
                                         roomViewModel.startListening(roomCodeInput)
                                         message = "✔ Ya estabas en esta sala"
                                     }
-
-                                    is JoinResult.Error ->
-                                        message = "⚠ Ocurrió un error inesperado"
+                                    is JoinResult.Error -> message = "⚠ Ocurrió un error inesperado"
                                 }
                             }
-                        }
+                        },
+                        enabled = roomCodeInput.isNotBlank()
                     ) {
                         Text("Unirme")
                     }

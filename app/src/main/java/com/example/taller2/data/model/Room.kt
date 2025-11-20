@@ -11,5 +11,6 @@ data class Room(
     @set:PropertyName("isActive")
     var isActive: Boolean = true,
     val currentTurnPlayerId: String? = null,
-    val maxPlayers: Int = 4
+    val maxPlayers: Int = 4,
+    val gameStarted: Boolean = false
 )

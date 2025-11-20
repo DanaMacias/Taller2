@@ -10,6 +10,7 @@ import com.example.taller2.data.repository.RoomRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlin.Boolean
 
 class RoomViewModel(
     private val repository: RoomRepository = RoomRepository()
@@ -30,7 +31,8 @@ class RoomViewModel(
             playerStatus = mapOf(userId to false),
             isActive = true,
             currentTurnPlayerId = userId,
-            maxPlayers = 4
+            maxPlayers = 4,
+            gameStarted = false
         )
 
         repository.createRoom(room) { success ->
@@ -60,6 +62,10 @@ class RoomViewModel(
 
     fun clearRoomState() {
         _room.value = null
+    }
+
+    fun startGame(roomId: String, onComplete: (Boolean) -> Unit) {
+        repository.startGame(roomId, onComplete)
     }
 }
 
